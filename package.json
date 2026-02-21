@@ -1,0 +1,24 @@
+{
+    "name": "auditkit",
+    "version": "0.1.0",
+    "private": true,
+    "scripts": {
+        "dev": "turbo run dev",
+        "build": "turbo run build",
+        "lint": "turbo run lint",
+        "type-check": "turbo run type-check",
+        "test": "turbo run test",
+        "clean": "turbo run clean"
+    },
+    "devDependencies": {
+        "turbo": "^2.3.3",
+        "typescript": "^5.7.3",
+        "@types/node": "^22.10.7",
+        "prettier": "^3.4.2",
+        "eslint": "^9.18.0"
+    },
+    "packageManager": "pnpm@9.15.4",
+    "engines": {
+        "node": ">=20"
+    }
+}

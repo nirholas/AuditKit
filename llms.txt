@@ -1,0 +1,35 @@
+# AuditKit
+
+> Zero-key website and GitHub repo auditor. Paste a URL, get scored across 6 pillars, download a ZIP of AI agent files pre-written to fix every issue.
+
+## Links
+
+- Repo: https://github.com/nirholas/AuditKit
+- Live: https://auditkit.dev
+- Docs: https://github.com/nirholas/AuditKit/tree/main/docs
+
+## What it does
+
+1. Accepts a website URL or GitHub repo URL
+2. Runs audits in parallel: PageSpeed/Core Web Vitals, SEO, Accessibility, Security headers, Structured Data, AI Readiness
+3. Scores each pillar 0–100 with a letter grade
+4. Lists actionable issues (critical / warning / info) with fixes
+5. Generates a downloadable ZIP containing:
+   - `AGENTS.md` — AI agent instructions customised to fix your site's issues
+   - `CLAUDE.md` — Claude-specific context
+   - `GEMINI.md` — Gemini-specific context
+   - `.agents/skills/{pillar}/SKILL.md` — one skill file per problem area
+   - `checklists/{pillar}.md` — human-readable checklists
+   - `ready-to-deploy/` — `robots.txt`, security headers, JSON-LD structured data
+
+## No API Keys Required
+
+Everything runs with public endpoints. No sign-up, no credits, no rate-limit anxiety.
+
+## Tech Stack
+
+Next.js 15, React 19, TypeScript, Tailwind CSS v4, pnpm monorepo, Turborepo
+
+## License
+
+MIT

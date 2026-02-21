@@ -1,0 +1,195 @@
+@import 'tailwindcss';
+
+:root {
+    --background: #05050f;
+    --foreground: #e8eaf6;
+    --muted: #6b7280;
+    --accent: #7eb8f7;
+    --success: #4ade80;
+    --warning: #fbbf24;
+    --danger: #f87171;
+}
+
+* {
+    box-sizing: border-box;
+}
+
+body {
+    background: var(--background);
+    color: var(--foreground);
+    font-family: var(--font-geist-sans), system-ui, sans-serif;
+    min-height: 100vh;
+    overflow-x: hidden;
+}
+
+/* ── Aurora orbs ─────────────────────────────────── */
+.aurora-bg {
+    position: fixed;
+    inset: 0;
+    z-index: 0;
+    overflow: hidden;
+    pointer-events: none;
+}
+
+.aurora-orb {
+    position: absolute;
+    border-radius: 50%;
+    filter: blur(90px);
+}
+
+.aurora-orb-1 {
+    top: -15%;
+    left: 35%;
+    width: 700px;
+    height: 500px;
+    background: radial-gradient(ellipse, rgba(186, 230, 253, 0.22) 0%, rgba(147, 197, 253, 0.1) 40%, transparent 70%);
+    animation: float-a 22s ease-in-out infinite;
+}
+
+.aurora-orb-2 {
+    top: -8%;
+    left: 10%;
+    width: 480px;
+    height: 340px;
+    background: radial-gradient(ellipse, rgba(165, 213, 255, 0.14) 0%, transparent 65%);
+    animation: float-b 28s ease-in-out infinite;
+}
+
+.aurora-orb-3 {
+    top: 8%;
+    right: 8%;
+    width: 340px;
+    height: 240px;
+    background: radial-gradient(ellipse, rgba(129, 140, 248, 0.11) 0%, transparent 65%);
+    animation: float-c 20s ease-in-out infinite;
+}
+
+@keyframes float-a {
+
+    0%,
+    100% {
+        transform: translate(0, 0) scale(1);
+    }
+
+    40% {
+        transform: translate(30px, -25px) scale(1.06);
+    }
+
+    70% {
+        transform: translate(-20px, 15px) scale(0.96);
+    }
+}
+
+@keyframes float-b {
+
+    0%,
+    100% {
+        transform: translate(0, 0);
+    }
+
+    35% {
+        transform: translate(-25px, 20px);
+    }
+
+    65% {
+        transform: translate(20px, -15px);
+    }
+}
+
+@keyframes float-c {
+
+    0%,
+    100% {
+        transform: translate(0, 0) scale(1);
+    }
+
+    50% {
+        transform: translate(-15px, 25px) scale(1.08);
+    }
+}
+
+/* ── Glass ───────────────────────────────────────── */
+.glass {
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    transition: border-color 0.2s ease, background 0.2s ease;
+}
+
+.glass:hover {
+    background: rgba(255, 255, 255, 0.055);
+    border-color: rgba(147, 197, 253, 0.22);
+}
+
+/* ── Glow button ─────────────────────────────────── */
+.btn-glow {
+    background: linear-gradient(135deg, #60a5fa 0%, #818cf8 100%);
+    box-shadow: 0 0 18px rgba(96, 165, 250, 0.4), 0 0 40px rgba(96, 165, 250, 0.15);
+    transition: box-shadow 0.2s ease, transform 0.15s ease;
+}
+
+.btn-glow:hover:not(:disabled) {
+    box-shadow: 0 0 28px rgba(96, 165, 250, 0.55), 0 0 60px rgba(96, 165, 250, 0.2);
+    transform: translateY(-1px);
+}
+
+.btn-glow:active:not(:disabled) {
+    transform: scale(0.97);
+}
+
+/* ── Input focus ─────────────────────────────────── */
+.input-glow:focus-within {
+    border-color: rgba(147, 197, 253, 0.45) !important;
+    box-shadow: 0 0 0 1px rgba(147, 197, 253, 0.12), 0 0 24px rgba(147, 197, 253, 0.1);
+}
+
+/* ── Shimmer ─────────────────────────────────────── */
+@keyframes shimmer {
+    0% {
+        background-position: -200% center;
+    }
+
+    100% {
+        background-position: 200% center;
+    }
+}
+
+.shimmer {
+    background: linear-gradient(90deg,
+            rgba(255, 255, 255, 0.02) 0%,
+            rgba(147, 197, 253, 0.1) 50%,
+            rgba(255, 255, 255, 0.02) 100%);
+    background-size: 200% auto;
+    animation: shimmer 2.2s linear infinite;
+}
+
+/* ── Score ring ──────────────────────────────────── */
+@keyframes score-fill {
+    from {
+        stroke-dashoffset: 283;
+    }
+
+    to {
+        stroke-dashoffset: var(--target-offset, 0);
+    }
+}
+
+/* ── Pulse dot ───────────────────────────────────── */
+@keyframes pulse-dot {
+
+    0%,
+    100% {
+        opacity: 0.3;
+        transform: scale(0.8);
+    }
+
+    50% {
+        opacity: 1;
+        transform: scale(1.2);
+    }
+}
+
+.pulse-dot {
+    animation: pulse-dot 1.4s ease-in-out infinite;
+}

@@ -1,0 +1,317 @@
+# AuditKit — Full LLM Context
+
+> Version: 0.1.0 | License: MIT | Repo: https://github.com/nirholas/AuditKit
+
+AuditKit is an open-source, zero-API-key website and GitHub repository auditor built with Next.js 15. Users paste a URL and receive a comprehensive audit across 6 pillars with actionable fixes, plus a downloadable ZIP of AI agent instruction files pre-populated with their specific issues.
+
+---
+
+## Core Concept
+
+**Input**: A URL (website or GitHub repo)
+**Output**: Scored audit + downloadable ZIP of AI agent files
+
+**Unique value**: Every other audit tool stops at "here are your problems." AuditKit goes further — it generates the actual `AGENTS.md`, `CLAUDE.md`, `GEMINI.md`, and skill files that tell your AI agent exactly how to fix each detected issue. Vibe coders paste the ZIP into their project and the agent does the rest.
+
+---
+
+## Zero API Keys
+
+AuditKit requires no API keys to run:
+
+| Data | Source | Key needed? |
+|------|--------|-------------|
+| Performance (LCP, CLS, FID, TBT, FCP, SI) | PageSpeed Insights (keyless) | ❌ |
+| Real-user field data (Core Web Vitals) | PSI `loadingExperience` block | ❌ |
+| Accessibility score | PSI Lighthouse (includes axe-core) | ❌ |
+| SEO score | PSI Lighthouse | ❌ |
+| Best Practices score | PSI Lighthouse | ❌ |
+| Security headers (CSP, HSTS, X-Frame, etc.) | Direct HEAD fetch | ❌ |
+| Meta tags, OG, Twitter Card | Direct HTML parse | ❌ |
+| Schema.org / JSON-LD | Direct HTML parse | ❌ |
+| `robots.txt` / `sitemap.xml` / `llms.txt` | Direct fetch | ❌ |
+| GitHub file existence | raw.githubusercontent.com HEAD | ❌ |
+| GitHub repo metadata | api.github.com (60 req/hr unauthed) | ❌ |
+
+---
+
+## Architecture
+
+```
+AuditKit/
+├── apps/
+│   └── web/                          # Next.js 15 app
+│       └── src/
+│           ├── app/
+│           │   ├── layout.tsx        # root layout, inter font, aurora bg
+│           │   ├── page.tsx          # main page: idle → loading → done → error
+│           │   ├── globals.css       # aurora orbs, glass cards, glow buttons
+│           │   └── api/audit/
+│           │       └── route.ts      # POST /api/audit — calls runAudit()
+│           ├── components/
+│           │   ├── url-input.tsx     # smart input: auto-detects GitHub vs URL
+│           │   ├── pillar-card.tsx   # per-pillar score card with issue list
+│           │   ├── score-ring.tsx    # animated SVG circular score ring
+│           │   ├── brief-download.tsx # ZIP download button
+│           │   └── audit-dashboard.tsx # full results layout
+│           └── lib/
+│               └── utils.ts          # cn(), scoreRingColor(), scoreColor(), gradeFromScore()
+│
+└── packages/
+    ├── collectors/                    # @auditkit/collectors
+    │   └── src/
+    │       ├── types.ts               # all shared TS interfaces
+    │       ├── pagespeed.ts           # PageSpeed Insights + parseCrUXFromPSI()
+    │       ├── crux.ts                # extracts CrUX from PSI response
+    │       ├── meta-parser.ts         # HTML fetch + parse meta/OG/schema/robots/llms.txt
+    │       ├── observatory.ts         # security headers via direct HEAD fetch
+    │       └── github.ts              # GitHub metadata + raw file HEAD checks
+    │
+    ├── scorer/                        # @auditkit/scorer
+    │   └── src/index.ts               # scorePerformance, scoreSEO, scoreAccessibility,
+    │                                  # scoreSecurity, scoreStructuredData, scoreAIReadiness
+    │
+    ├── analyzer/                      # @auditkit/analyzer
+    │   └── src/index.ts               # runAudit({ url, type }) → AuditResult
+    │
+    └── generator/                     # @auditkit/generator
+        └── src/
+            ├── index.ts               # generateBriefZip(result) → Blob
+            └── templates.ts           # generateAgentsMd, generateClaudeMd, generateGeminiMd,
+                                       # generateSkillMd, generateRobotsTxt, generateSecurityHeaders,
+                                       # generateLlmsTxt
+```
+
+---
+
+## Key TypeScript Interfaces
+
+### packages/collectors/src/types.ts
+
+```typescript
+type PillarId = 'performance' | 'seo' | 'accessibility' | 'security' | 'structured-data' | 'ai-readiness' | 'repo-health'
+
+interface AuditIssue {
+  id: string
+  severity: 'critical' | 'warning' | 'info'
+  message: string
+  fix?: string        // plain-English fix description — feeds into generator templates
+  learnMore?: string  // URL to MDN, web.dev, etc.
+}
+
+interface PillarScore {
+  id: PillarId
+  label: string
+  score: number       // 0–100, always clamped
+  grade: string       // 'A+' | 'A' | 'B' | 'C' | 'D' | 'F'
+  issues: AuditIssue[]
+  raw?: unknown       // original API data for debugging
+}
+
+interface AuditResult {
+  url: string
+  type: 'url' | 'github'
+  auditedAt: string   // ISO date
+  pillars: PillarScore[]
+  meta?: MetaData
+  github?: GitHubData
+}
+
+// CollectorResult<T> — every collector returns this, never throws
+type CollectorResult<T> =
+  | { status: 'ok'; data: T; durationMs: number }
+  | { status: 'error'; error: string; durationMs: number }
+  | { status: 'skipped'; error: string; durationMs: number }
+```
+
+### PageSpeedData
+
+```typescript
+interface PageSpeedData {
+  performanceScore: number      // 0–100
+  accessibilityScore?: number
+  seoScore?: number
+  bestPracticesScore?: number
+  fcp: number                   // ms
+  lcp: number                   // ms
+  cls: number                   // unitless score
+  tbt: number                   // ms (Total Blocking Time)
+  ttfb: number                  // ms
+  speedIndex: number            // ms
+  opportunities: Array<{ title: string; savings: number }>
+  diagnostics: Array<{ title: string; description: string }>
+}
+```
+
+### SecurityData
+
+```typescript
+interface SecurityData {
+  https: boolean
+  hsts: boolean
+  csp: boolean
+  xFrameOptions: boolean
+  xContentTypeOptions: boolean
+  referrerPolicy: boolean
+  permissionsPolicy: boolean
+  serverHeader?: string
+  poweredBy?: string
+}
+```
+
+### MetaData
+
+```typescript
+interface MetaData {
+  title?: string
+  description?: string
+  canonical?: string
+  ogTitle?: string
+  ogDescription?: string
+  ogImage?: string
+  twitterCard?: string
+  hasSchema: boolean
+  schemaTypes: string[]
+  hasRobotsTxt: boolean
+  hasSitemapXml: boolean
+  hasLlmsTxt: boolean
+  hasAgentsMd: boolean
+  tech: string[]
+}
+```
+
+### GitHubData
+
+```typescript
+interface GitHubData {
+  owner: string; repo: string; description?: string
+  stars: number; forks: number; openIssues: number
+  license?: string; defaultBranch: string
+  hasReadme: boolean; hasLicense: boolean; hasContributing: boolean
+  hasCodeOfConduct: boolean; hasSecurity: boolean; hasCodeowners: boolean
+  hasAgentsMd: boolean; hasClaude: boolean; hasGemini: boolean
+  hasCopilotInstructions: boolean; hasLlmsTxt: boolean
+  hasGithubWorkflows: boolean; hasDependabot: boolean
+  hasBranchProtection: boolean; hasIssueTemplates: boolean; hasPrTemplate: boolean
+  topicsCount: number; latestRelease?: string; daysSinceLastCommit: number
+}
+```
+
+---
+
+## Scoring Logic
+
+Each pillar scorer takes raw collector data and returns a `PillarScore`:
+
+```typescript
+// Performance scoring (packages/scorer/src/index.ts)
+scorePerformance(data: PageSpeedData): PillarScore
+// Starts at PSI performance score, deducts for slow LCP/CLS/TBT
+
+scoreSEO(data: PageSpeedData, meta: MetaData): PillarScore
+// Starts at PSI SEO score, deducts for missing title, description, canonical, OG tags
+
+scoreAccessibility(data: PageSpeedData): PillarScore
+// PSI accessibility score + issues from Lighthouse
+
+scoreSecurity(data: SecurityData): PillarScore
+// Starts at 100, deducts: no HTTPS (-40), no HSTS (-15), no CSP (-20), etc.
+
+scoreStructuredData(meta: MetaData): PillarScore
+// Has JSON-LD? Has sitemap? Schema types present?
+
+scoreAIReadiness(meta: MetaData, github?: GitHubData): PillarScore
+// Checks llms.txt, AGENTS.md, robots.txt ai-directives, sitemap for AI crawlers
+```
+
+---
+
+## ZIP Output Structure
+
+`generateBriefZip(result)` produces a ZIP with:
+
+```
+AGENTS.md                             # project-level AI agent instructions
+CLAUDE.md                             # Claude-specific
+GEMINI.md                             # Gemini-specific
+llms.txt                              # auto-generated llms.txt for the audited site
+.agents/skills/performance/SKILL.md  # only included if pillar has issues
+.agents/skills/seo/SKILL.md
+.agents/skills/accessibility/SKILL.md
+.agents/skills/security/SKILL.md
+.agents/skills/structured-data/SKILL.md
+.agents/skills/ai-readiness/SKILL.md
+checklists/performance.md
+checklists/seo.md
+checklists/accessibility.md
+checklists/security.md
+ready-to-deploy/robots.txt            # generated robots.txt for the site
+ready-to-deploy/security-headers.next.js  # Next.js config snippet
+ready-to-deploy/structured-data.jsonld    # JSON-LD template
+audit-summary.json                    # machine-readable full results
+```
+
+---
+
+## API Route
+
+```typescript
+// apps/web/src/app/api/audit/route.ts
+// POST /api/audit
+// Body: { url: string }
+// Response: AuditResult JSON
+// Timeout: 60s (Vercel Pro)
+```
+
+---
+
+## Design System
+
+Aurora gradient aesthetic:
+- Background: `#05050f` (near-black)
+- Floating orbs: `rgba(147,197,253, ...)` (soft blue) + `rgba(186,130,253, ...)` (lavender)
+- Glass cards: `rgba(255,255,255,0.03–0.06)` bg + `rgba(147,197,253,0.08–0.15)` border
+- Glow buttons: `linear-gradient(135deg, #60a5fa, #818cf8)` + blue box-shadow
+- Text primary: `rgba(186,210,255,0.9)` | secondary: `rgba(147,197,253,0.45)`
+- Score colors: green `#4ade80` (≥90) · amber `#fbbf24` (50–89) · red `#f87171` (<50)
+
+---
+
+## Running Locally
+
+```bash
+git clone https://github.com/nirholas/AuditKit
+cd AuditKit
+pnpm install
+bun run dev    # http://localhost:3000
+```
+
+No `.env` file needed. Everything works out of the box.
+
+---
+
+## Roadmap
+
+- [ ] Lighthouse local runner (no network call, faster, works for localhost)
+- [ ] W3C HTML validator integration
+- [ ] Carbon footprint score (websitecarbon.com)
+- [ ] Multi-page crawl mode
+- [ ] History / compare audits (Postgres + Drizzle, Phase 2)
+- [ ] CLI: `npx auditkit https://yoursite.com`
+- [ ] GitHub Action: run on every deploy
+
+---
+
+## Frequently Asked Questions
+
+**Q: Does AuditKit store my URL or results?**
+A: No. Phase 1 is completely stateless — results exist only in the HTTP response.
+
+**Q: Can I audit localhost?**
+A: Not with the hosted version (external APIs can't reach localhost). Use the planned CLI or local Lighthouse runner.
+
+**Q: Why not just use Lighthouse directly?**
+A: The generator layer is the differentiator. Lighthouse tells you what's wrong. AuditKit writes the agent files that fix it.
+
+**Q: Can I self-host?**
+A: Yes — clone, `pnpm install`, deploy to Vercel/Railway/Fly.io. No secrets required.

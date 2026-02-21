@@ -1,0 +1,5 @@
+Contact: https://github.com/nirholas/AuditKit/security/advisories/new
+Expires: 2027-01-01T00:00:00.000Z
+Preferred-Languages: en
+Canonical: https://auditkit.dev/.well-known/security.txt
+Policy: https://github.com/nirholas/AuditKit/blob/main/SECURITY.md
