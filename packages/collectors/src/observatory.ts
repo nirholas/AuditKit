@@ -43,8 +43,8 @@ export async function collectSecurity(url: string): Promise<CollectorResult<Secu
         // Observatory score
         let grade: string | undefined
         if (triggerRes.status === 'fulfilled' && triggerRes.value.ok) {
-            const json = await triggerRes.value.json().catch(() => null)
-            grade = json?.grade
+            const json = await triggerRes.value.json().catch(() => null) as Record<string, unknown> | null
+            grade = json?.['grade'] as string | undefined
         }
 
         const data: SecurityData = {

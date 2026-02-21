@@ -17,7 +17,7 @@ export async function collectCrUX(url: string): Promise<CollectorResult<CrUXData
             return { status: 'skipped', error: `PSI: ${res.status}`, durationMs: Date.now() - start }
         }
 
-        const json = await res.json()
+        const json = await res.json() as Record<string, unknown>
         const crux = parseCrUXFromPSI(json)
 
         if (!crux) {

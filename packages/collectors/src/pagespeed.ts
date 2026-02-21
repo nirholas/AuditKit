@@ -20,9 +20,10 @@ export async function collectPageSpeed(
             return { status: 'error', error: `PageSpeed API ${res.status}`, durationMs: Date.now() - start }
         }
 
-        const json = await res.json()
-        const cats = json.lighthouseResult?.categories
-        const audits = json.lighthouseResult?.audits
+        const json = await res.json() as Record<string, unknown>
+        const lr = json['lighthouseResult'] as Record<string, Record<string, unknown>> | undefined
+        const cats = lr?.['categories'] as Record<string, { score: number }> | undefined
+        const audits = lr?.['audits'] as Record<string, Record<string, unknown>> | undefined
 
         const opportunities: PageSpeedData['opportunities'] = []
         const diagnostics: PageSpeedData['diagnostics'] = []
@@ -50,14 +51,17 @@ export async function collectPageSpeed(
             }
         }
 
+        const getAuditNum = (key: string) =>
+            ((audits?.[key] as Record<string, unknown> | undefined)?.['numericValue'] as number | undefined) ?? 0
+
         const data: PageSpeedData = {
-            performanceScore: Math.round((cats?.performance?.score ?? 0) * 100),
-            fcp: audits?.['first-contentful-paint']?.numericValue ?? 0,
-            lcp: audits?.['largest-contentful-paint']?.numericValue ?? 0,
-            cls: audits?.['cumulative-layout-shift']?.numericValue ?? 0,
-            tbt: audits?.['total-blocking-time']?.numericValue ?? 0,
-            ttfb: audits?.['server-response-time']?.numericValue ?? 0,
-            speedIndex: audits?.['speed-index']?.numericValue ?? 0,
+            performanceScore: Math.round(((cats?.['performance'] as { score: number } | undefined)?.score ?? 0) * 100),
+            fcp: getAuditNum('first-contentful-paint'),
+            lcp: getAuditNum('largest-contentful-paint'),
+            cls: getAuditNum('cumulative-layout-shift'),
+            tbt: getAuditNum('total-blocking-time'),
+            ttfb: getAuditNum('server-response-time'),
+            speedIndex: getAuditNum('speed-index'),
             opportunities: opportunities.sort((a, b) => b.savings - a.savings).slice(0, 5),
             diagnostics: diagnostics.slice(0, 5),
         }

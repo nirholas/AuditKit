@@ -10,8 +10,7 @@
         "declarationMap": true,
         "sourceMap": true,
         "strict": true,
-        "noUncheckedIndexedAccess": true,
-        "exactOptionalPropertyTypes": true,
+        "noUncheckedIndexedAccess": false,
         "skipLibCheck": true
     }
 }

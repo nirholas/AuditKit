@@ -41,15 +41,17 @@ export async function collectGitHub(repoUrl: string): Promise<CollectorResult<Gi
                 durationMs: Date.now() - start,
             }
         }
-        const repoData = await repoRes.json()
-        const branch: string = repoData.default_branch ?? 'HEAD'
+        const repoData = await repoRes.json() as Record<string, unknown>
+        const branch: string = (repoData['default_branch'] as string | undefined) ?? 'HEAD'
 
         // 2. Check last commit date
         const commitsRes = await get(`/repos/${owner}/${repo}/commits?per_page=1`).catch(() => null)
         let daysSinceLastCommit = 999
         if (commitsRes?.ok) {
-            const commits = await commitsRes.json()
-            const lastCommitDate = commits?.[0]?.commit?.committer?.date
+            const commits = await commitsRes.json() as Array<Record<string, unknown>>
+            const lastCommit = commits[0]
+            const lastCommitDate = ((lastCommit?.['commit'] as Record<string, unknown> | undefined)
+                ?.['committer'] as Record<string, unknown> | undefined)?.['date'] as string | undefined
             if (lastCommitDate) {
                 daysSinceLastCommit = Math.floor(
                     (Date.now() - new Date(lastCommitDate).getTime()) / (1000 * 60 * 60 * 24),
@@ -83,33 +85,35 @@ export async function collectGitHub(repoUrl: string): Promise<CollectorResult<Gi
             }).then((r) => r.ok).catch(() => false),
         ])
 
+        const rd = repoData
+        const license = (rd['license'] as Record<string, unknown> | undefined)
         const data: GitHubData = {
             owner: owner ?? '',
             repo: repo ?? '',
-            description: repoData.description,
-            stars: repoData.stargazers_count,
-            forks: repoData.forks_count,
-            openIssues: repoData.open_issues_count,
-            license: repoData.license?.spdx_id,
+            description: rd['description'] as string | undefined,
+            stars: (rd['stargazers_count'] as number | undefined) ?? 0,
+            forks: (rd['forks_count'] as number | undefined) ?? 0,
+            openIssues: (rd['open_issues_count'] as number | undefined) ?? 0,
+            license: license?.['spdx_id'] as string | undefined,
             defaultBranch: branch,
-            hasReadme,
-            hasLicense,
-            hasContributing,
-            hasCodeOfConduct,
-            hasSecurity,
-            hasCodeowners,
-            hasAgentsMd,
-            hasClaude,
-            hasGemini,
-            hasCopilotInstructions,
-            hasLlmsTxt: hasLlmsTxt || hasLlmsFullTxt,
-            hasGithubWorkflows: hasWorkflows,
-            hasDependabot,
+            hasReadme: hasReadme ?? false,
+            hasLicense: hasLicense ?? false,
+            hasContributing: hasContributing ?? false,
+            hasCodeOfConduct: hasCodeOfConduct ?? false,
+            hasSecurity: hasSecurity ?? false,
+            hasCodeowners: hasCodeowners ?? false,
+            hasAgentsMd: hasAgentsMd ?? false,
+            hasClaude: hasClaude ?? false,
+            hasGemini: hasGemini ?? false,
+            hasCopilotInstructions: hasCopilotInstructions ?? false,
+            hasLlmsTxt: (hasLlmsTxt ?? false) || (hasLlmsFullTxt ?? false),
+            hasGithubWorkflows: hasWorkflows ?? false,
+            hasDependabot: hasDependabot ?? false,
             hasBranchProtection: false, // requires admin token
-            hasIssueTemplates,
-            hasPrTemplate,
-            topicsCount: (repoData.topics ?? []).length,
-            latestRelease: repoData.pushed_at,
+            hasIssueTemplates: hasIssueTemplates ?? false,
+            hasPrTemplate: hasPrTemplate ?? false,
+            topicsCount: ((rd['topics'] as unknown[] | undefined) ?? []).length,
+            latestRelease: rd['pushed_at'] as string | undefined,
             daysSinceLastCommit,
         }
 
