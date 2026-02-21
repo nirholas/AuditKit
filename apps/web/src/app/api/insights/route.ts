@@ -1,6 +1,6 @@
 import { NextRequest } from 'next/server'
 import Groq from 'groq-sdk'
-import type { AuditResult } from '@auditkit/collectors'
+import type { AuditResult } from '@auditkit/analyzer'
 
 export const maxDuration = 30
 

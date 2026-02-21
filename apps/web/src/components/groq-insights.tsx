@@ -1,7 +1,7 @@
 'use client'
 
 import { useEffect, useRef, useState } from 'react'
-import type { AuditResult } from '@auditkit/collectors'
+import type { AuditResult } from '@auditkit/analyzer'
 
 interface GroqInsightsProps {
     result: AuditResult
