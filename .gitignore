@@ -33,3 +33,8 @@ coverage
 
 # misc
 *.tsbuildinfo
+web-check/
+scorecard/
+unlighthouse/
+sitespeed/
+webhint/
