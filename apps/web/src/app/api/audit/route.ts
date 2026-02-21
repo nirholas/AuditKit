@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { z } from 'zod'
 import { runAudit } from '@auditkit/analyzer'
+import { generateAgentsMd, generateClaudeMd, generateGeminiMd, generateSkillMd } from '@auditkit/generator'
 
 const RequestSchema = z.object({
     url: z.string().url(),
@@ -22,7 +23,19 @@ export async function POST(req: NextRequest) {
         const { url, type } = parsed.data
         const result = await runAudit({ url, type })
 
-        return NextResponse.json(result)
+        // Generate brief preview so the UI can show file contents before download
+        const briefPreview = {
+            agentsMd: generateAgentsMd(result),
+            claudeMd: generateClaudeMd(result),
+            geminiMd: generateGeminiMd(result),
+            skills: Object.fromEntries(
+                result.pillars
+                    .filter((p) => p.issues.length > 0)
+                    .map((p) => [p.id, generateSkillMd(p.label, p.issues, url)]),
+            ),
+        }
+
+        return NextResponse.json({ ...result, briefPreview })
     } catch (err) {
         const message = err instanceof Error ? err.message : 'Audit failed'
         console.error('[audit]', message)

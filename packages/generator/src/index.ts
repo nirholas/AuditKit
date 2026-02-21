@@ -10,7 +10,7 @@ import {
     generateLlmsTxt,
 } from './templates.js'
 
-export { generateAgentsMd, generateClaudeMd, generateGeminiMd } from './templates.js'
+export { generateAgentsMd, generateClaudeMd, generateGeminiMd, generateSkillMd } from './templates.js'
 
 export async function generateBriefZip(result: AuditResult): Promise<Blob> {
     const zip = new JSZip()

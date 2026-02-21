@@ -4,6 +4,7 @@ import type { AuditResult } from '@auditkit/analyzer'
 import { PillarCard } from './pillar-card'
 import { BriefDownload } from './brief-download'
 import { ScoreRing } from './score-ring'
+import GroqInsights from './groq-insights'
 import { ExternalLink, RefreshCw } from 'lucide-react'
 
 interface AuditDashboardProps {
@@ -64,6 +65,9 @@ export function AuditDashboard({ result, onReset }: AuditDashboardProps) {
 
             {/* AI Brief Download */}
             <BriefDownload result={result} />
+
+            {/* Groq AI Insights */}
+            <GroqInsights result={result} />
 
             {/* Pillar grid */}
             <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">

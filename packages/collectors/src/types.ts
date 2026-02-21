@@ -144,6 +144,15 @@ export interface CollectorResult<T> {
     durationMs: number
 }
 
+// ─── Brief preview (file contents rendered before download) ─────────────────
+
+export interface BriefPreview {
+    agentsMd: string
+    claudeMd: string
+    geminiMd: string
+    skills: Record<string, string>  // pillarId → SKILL.md content
+}
+
 // ─── Full audit result ────────────────────────────────────────────────────────
 
 export interface AuditResult {
@@ -152,6 +161,7 @@ export interface AuditResult {
     auditedAt: string   // ISO timestamp
     pillars: PillarScore[]
     meta?: MetaData
+    briefPreview?: BriefPreview
     raw?: {
         pagespeed?: CollectorResult<PageSpeedData>
         crux?: CollectorResult<CrUXData>
