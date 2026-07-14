@@ -104,4 +104,4 @@ See [CONTRIBUTING.md](CONTRIBUTING.md). PRs welcome.
 
 ## License
 
-MIT
+All rights reserved. See [LICENSE](LICENSE).
