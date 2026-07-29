@@ -3,6 +3,11 @@
     "name": "auditkit",
     "version": "0.1.0",
     "private": true,
+    "description": "Full-stack website and GitHub repo auditor: scores performance, SEO, accessibility, security, structured data and AI readiness, then generates a ready-to-run AI agent fix brief.",
+    "repository": {
+        "type": "git",
+        "url": "https://github.com/nirholas/AuditKit"
+    },
     "scripts": {
         "dev": "turbo run dev",
         "build": "turbo run build",
