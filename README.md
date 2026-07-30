@@ -8,7 +8,7 @@
 |---|---|
 | Performance | Google PageSpeed Insights, Chrome UX Report (real users) |
 | SEO | Meta tags, canonical, OG/Twitter, robots.txt, sitemap, TTFB |
-| Accessibility | axe-core (WCAG 2.1 A/AA/AAA) — Phase 2 |
+| Accessibility | axe-core (WCAG 2.1 A/AA/AAA), not yet implemented (Phase 2) |
 | Security | Mozilla Observatory, direct header check, SSL/TLS |
 | Structured Data | JSON-LD detection, schema.org type validation |
 | AI Readiness | llms.txt, AGENTS.md, robots.txt AI clauses, OG completeness |
@@ -58,8 +58,10 @@ pnpm install
 
 # Configure
 cp .env.example .env
-# Add GOOGLE_API_KEY for PageSpeed + CrUX
-# Add GITHUB_TOKEN for higher GitHub API rate limits (optional)
+# Every key is optional. AuditKit runs with none of them.
+# GOOGLE_API_KEY  raises the PageSpeed Insights quota
+# GITHUB_TOKEN    raises the GitHub API rate limit (60/hr -> 5,000/hr)
+# GROQ_API_KEY    enables the AI Insights panel shown after each audit
 
 # Run
 pnpm dev
@@ -80,21 +82,20 @@ auditkit/
 
 ## APIs used
 
-| API | Free? | Requires Key? |
-|---|---|---|
-| Google PageSpeed Insights | ✅ | Optional (quota) |
-| Chrome UX Report (CrUX) | ✅ | Required |
-| Mozilla Observatory | ✅ | No |
-| GitHub REST API | ✅ | Optional (rate limits) |
-| W3C Nu Validator | ✅ | No |
-| Website Carbon API | ✅ | No |
+| API | Free? | Requires Key? | Used by |
+|---|---|---|---|
+| Google PageSpeed Insights | ✅ | Optional (quota) | `packages/collectors/src/pagespeed.ts` |
+| Chrome UX Report (CrUX) | ✅ | No, field data is read from the PageSpeed response | `packages/collectors/src/crux.ts` |
+| Mozilla HTTP Observatory | ✅ | No | `packages/collectors/src/observatory.ts` |
+| GitHub REST API | ✅ | Optional (rate limits) | `packages/collectors/src/github.ts` |
+| Groq (`llama-3.3-70b-versatile`) | ✅ | Yes, for the AI Insights panel only | `apps/web/src/app/api/insights/route.ts` |
 
 ## Roadmap
 
-- [ ] Phase 1: URL audit (PageSpeed, CrUX, meta, security) ✅
+- [x] Phase 1: URL audit (PageSpeed, CrUX, meta, security)
 - [ ] Phase 2: axe-core accessibility via Playwright
-- [ ] Phase 3: GitHub repo scanning ✅
-- [ ] Phase 4: AI brief generator ✅
+- [x] Phase 3: GitHub repo scanning
+- [x] Phase 4: AI brief generator
 - [ ] Phase 5: GCP Cloud Run workers for long-running collectors
 - [ ] Phase 6: Side-by-side comparison, share links, diff re-runs
 
