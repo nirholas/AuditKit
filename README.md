@@ -106,3 +106,10 @@ See [CONTRIBUTING.md](CONTRIBUTING.md). PRs welcome.
 ## License
 
 All rights reserved. See [LICENSE](LICENSE).
+
+## Documentation
+
+Full documentation site: **https://nirholas.github.io/AuditKit/**
+
+- [Getting started](docs/getting-started.md) covers install and first run.
+- [Examples](docs/examples.md) has copy-paste snippets.
