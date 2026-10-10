@@ -1,0 +1,9 @@
+cff-version: 1.2.0
+message: If you use this software, please cite it as below.
+title: "AuditKit"
+abstract: "Website and GitHub repo auditor that scores performance, SEO, accessibility, security and AI readiness from a pasted URL."
+repository-code: "https://github.com/nirholas/AuditKit"
+url: "https://three.ws"
+authors:
+  - name: three.ws
+    website: "https://three.ws"
