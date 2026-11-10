@@ -1,0 +1,18 @@
+{
+  "name": "auditkit",
+  "version": "0.1.0",
+  "description": "Audit a website or GitHub repo for performance, SEO, accessibility, security and AI readiness, then fix the findings.",
+  "author": {
+    "name": "nirholas"
+  },
+  "repository": "https://github.com/nirholas/AuditKit",
+  "homepage": "https://nirholas.github.io/AuditKit/",
+  "keywords": [
+    "audit",
+    "seo",
+    "accessibility",
+    "web-performance",
+    "security-headers",
+    "ai-readiness"
+  ]
+}
