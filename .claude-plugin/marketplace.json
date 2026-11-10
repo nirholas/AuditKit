@@ -1,0 +1,21 @@
+{
+  "name": "auditkit",
+  "owner": {
+    "name": "nirholas"
+  },
+  "description": "Audit a website or GitHub repo for performance, SEO, accessibility, security and AI readiness, then fix the findings.",
+  "plugins": [
+    {
+      "name": "auditkit",
+      "source": "./plugins/auditkit",
+      "description": "Audit a website or GitHub repo for performance, SEO, accessibility, security and AI readiness, then fix the findings.",
+      "category": "development",
+      "tags": [
+        "audit",
+        "seo",
+        "accessibility",
+        "security"
+      ]
+    }
+  ]
+}
